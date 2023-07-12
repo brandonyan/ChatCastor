@@ -50,13 +50,10 @@ class ChatCastorClass extends CoreClass {
     const { from, body } = ctx;
     
     const regex = /(\D+)\s(\d+\.?\d*)\s?(\D+)?/;
-    if (this.data.employs.includes(from) && body.match(regex)) {
-      const [_, product, subPrice, means] = body.toLowerCase().match(regex);
+    if (this.data.employs.includes(from) && body?.match(regex)) {
+      const [_, product, subPrice, means] = body.match(regex);
       if (means !== "nequi" && means !== "daviplata" && means) {
-        const confirmMessagge = {
-          answer: `Favor verificar el medio de pago, enviaste ${means} en lugar de *nequi* o *daviplata*`,
-        };
-        this.sendFlowSimple([confirmMessagge], from);
+        
       } else if (product && subPrice) {
         const price = parseFloat(subPrice) * 1000;
         const parseMessagge = {
@@ -68,9 +65,7 @@ class ChatCastorClass extends CoreClass {
 
         if (means) {
           const confirmMessagge = {
-            answer: `Favor confirmar el pago por *${means.toUpperCase()}* por valor de *$${price.toLocaleString(
-              "es-MX"
-            )}* al numero ${this.data.nequi}`,
+            answer: `Favor confirmar el pago por *${means.toUpperCase()}* por valor de *$${price.toLocaleString("es-MX")}*`,
           };
 
           this.sendFlowSimple([confirmMessagge], this.data.nequi);
