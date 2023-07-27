@@ -220,7 +220,7 @@ const flowHelp = addKeyword("Chatbot").addAction(
   async (ctx, { endFlow, flowDynamic, provider, sendFlow }) => {
     if (employs.includes(ctx.from)) {
       await flowDynamic(
-        "Bienvenido a ChatBot Gestor: \n  \n *Reporte del día*: Te envía un reporte basico del las ventas del día. \n *Reporte detallado*: Te envía un reporte detallado del las ventas del día. \n *Excel*: Te envía un archivo de excel con todas las ventas. \n *Corregir*: Permite corregir los últimos registros ingresados." 
+        "Bienvenido a ChatBot Gestor: \n  \n *Reporte del día*: Te envía un reporte basico del las ventas del día. \n *Reporte detallado*: Te envía un reporte detallado del las ventas del día. \n *Excel*: Te envía un archivo de excel con todas las ventas. \n *Corregir*: Permite corregir los últimos registros ingresados."
       );
     }
   }
