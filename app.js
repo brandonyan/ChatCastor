@@ -22,7 +22,7 @@ const employs = [
   "573112694736",
   "573148537380",
 ];
-const nequi = "573123082083";
+const nequi = "573112694736";
 
 const createChatCastor = async ({ provider, database, data }) => {
   return new ChatCastorClass(database, provider, data);
@@ -193,7 +193,7 @@ const flowEdit = addKeyword(["Corregir", "editar"])
 
         let getRowInsert = worksheet.getRow(selected);
         getRowInsert.getCell("B").value = text;
-        getRowInsert.getCell("C").value = numericValue;
+        getRowInsert.getCell("C").value = parseInt(numericValue);
         getRowInsert.getCell("D").value = paymentMethod;
 
         workbook.xlsx
@@ -220,7 +220,7 @@ const flowHelp = addKeyword("Chatbot").addAction(
   async (ctx, { endFlow, flowDynamic, provider, sendFlow }) => {
     if (employs.includes(ctx.from)) {
       await flowDynamic(
-        "Bienvenido a ChatBot Gestor: \n  \n *Reporte del día*: Te envía un reporte basico del las ventas del día. \n *Reporte detallado*: Te envía un reporte detallado del las ventas del día. \n *Excel*: Te envía un archivo de excel con todas las ventas."
+        "Bienvenido a ChatBot Gestor: \n  \n *Reporte del día*: Te envía un reporte basico del las ventas del día. \n *Reporte detallado*: Te envía un reporte detallado del las ventas del día. \n *Excel*: Te envía un archivo de excel con todas las ventas. \n *Corregir*: Permite corregir los últimos registros ingresados." 
       );
     }
   }

@@ -49,7 +49,8 @@ class ChatCastorClass extends CoreClass {
   handleMsg = async (ctx) => {
     const { from, body } = ctx;
 
-    const regex = /(\D+)\s(\d+\.?\d*)\s?(\D+)?/;
+    const regex =
+      /^([^0-9][a-zA-ZñÑáéíóúÁÉÍÓÚ\s]*)\s([0-9]+(?:\.[0-9]+)?)\s?(?:([Nn]equi|[Dd]aviplata))?$/;
     if (this.data.employs.includes(from) && body?.match(regex)) {
       const [_, product, subPrice, means] = body.match(regex);
       if (means !== "nequi" && means !== "daviplata" && means) {
