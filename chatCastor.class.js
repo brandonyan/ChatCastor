@@ -1,6 +1,6 @@
 const { CoreClass } = require("@bot-whatsapp/bot");
-const fs = require("fs");
-
+const fs = require("node:fs");
+const path = require("node:path");
 class ChatCastorClass extends CoreClass {
   data;
   constructor(_database, _provider, data) {
@@ -9,7 +9,7 @@ class ChatCastorClass extends CoreClass {
   }
 
   saveData = (product, price, means) => {
-    const pathData = `./chats/ventas.xlsx`;
+    const pathData = path.join("chats", "ventas.xlsx");
     const workbook = new this.data.exceljs.Workbook();
     const today = this.data.moment().format("DD-MM-YY hh:mm");
 
@@ -48,16 +48,17 @@ class ChatCastorClass extends CoreClass {
 
   handleMsg = async (ctx) => {
     const { from, body } = ctx;
-    
+
     const regex = /(\D+)\s(\d+\.?\d*)\s?(\D+)?/;
     if (this.data.employs.includes(from) && body?.match(regex)) {
       const [_, product, subPrice, means] = body.match(regex);
       if (means !== "nequi" && means !== "daviplata" && means) {
-        
       } else if (product && subPrice) {
         const price = parseFloat(subPrice) * 1000;
         const parseMessagge = {
-          answer: `Registro guardado de *${product}*, por valor de *$${price.toLocaleString("es-MX")}*`,
+          answer: `Registro guardado de *${product}*, por valor de *$${price.toLocaleString(
+            "es-MX"
+          )}*`,
         };
 
         this.sendFlowSimple([parseMessagge], from);
@@ -65,7 +66,9 @@ class ChatCastorClass extends CoreClass {
 
         if (means) {
           const confirmMessagge = {
-            answer: `Favor confirmar el pago por *${means.toUpperCase()}* por valor de *$${price.toLocaleString("es-MX")}*`,
+            answer: `Favor confirmar el pago por *${means.toUpperCase()}* por valor de *$${price.toLocaleString(
+              "es-MX"
+            )}*`,
           };
 
           this.sendFlowSimple([confirmMessagge], this.data.nequi);

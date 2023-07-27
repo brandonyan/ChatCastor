@@ -4,6 +4,7 @@ const {
   createFlow,
   addKeyword,
 } = require("@bot-whatsapp/bot");
+const path = require("node:path");
 
 const QRPortalWeb = require("@bot-whatsapp/portal");
 const BaileysProvider = require("@bot-whatsapp/provider/baileys");
@@ -11,7 +12,7 @@ const MockAdapter = require("@bot-whatsapp/database/mock");
 
 const exceljs = require("exceljs");
 const moment = require("moment");
-const pathData = `./chats/ventas.xlsx`;
+const pathData = path.join("chats", "ventas.xlsx");
 
 const ChatCastorClass = require("./chatCastor.class");
 
@@ -57,133 +58,124 @@ const flowPrincipal = addKeyword(
   {
     sensitive: true,
   }
-).addAction(
-  async (ctx, { endFlow, flowDynamic, provider, sendFlow }) => {
-    const today = moment().format("DD-MM-YY");
-    const rowsByDate = [];
-    const rowsByMeans = {
-      efectivo: [],
-      nequi: [],
-      daviplata: [],
-    };
-    let totalByDate = 0;
-    let totalByMeans = {
-      efectivo: 0,
-      nequi: 0,
-      daviplata: 0,
-    };
-    let totalProducts = {};
+).addAction(async (ctx, { endFlow, flowDynamic, provider, sendFlow }) => {
+  const today = moment().format("DD-MM-YY");
+  const rowsByDate = [];
+  const rowsByMeans = {
+    efectivo: [],
+    nequi: [],
+    daviplata: [],
+  };
+  let totalByDate = 0;
+  let totalByMeans = {
+    efectivo: 0,
+    nequi: 0,
+    daviplata: 0,
+  };
+  let totalProducts = {};
 
-    if (employs.includes(ctx.from)) {
-      const workbook = new exceljs.Workbook();
-      await workbook.xlsx.readFile(pathData);
-      const worksheet = workbook.getWorksheet(1);
+  if (employs.includes(ctx.from)) {
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(pathData);
+    const worksheet = workbook.getWorksheet(1);
 
-      worksheet.eachRow((row, rowNumber) => {
-        const cellDateValue = row.getCell("A").value;
-        const cellMeansValue = row.getCell("D").value;
-        const cellPriceValue = row.getCell("C").value;
-        const cellProducs = row.getCell("B").value;
-        const [day, _] = cellDateValue.split(" ");
+    worksheet.eachRow((row, rowNumber) => {
+      const cellDateValue = row.getCell("A").value;
+      const cellMeansValue = row.getCell("D").value;
+      const cellPriceValue = row.getCell("C").value;
+      const cellProducs = row.getCell("B").value;
+      const [day, _] = cellDateValue.split(" ");
 
-        if (day === today) {
-          rowsByDate.push(rowNumber);
-          totalByDate = totalByDate + cellPriceValue;
-          rowsByMeans[cellMeansValue].push(rowNumber);
-          totalByMeans[cellMeansValue] =
-            totalByMeans[cellMeansValue] + cellPriceValue;
-          if (!totalProducts[cellProducs]?.length) {
-            totalProducts[cellProducs] = [cellPriceValue];
-          } else {
-            totalProducts[cellProducs].push(cellPriceValue);
-          }
+      if (day === today) {
+        rowsByDate.push(rowNumber);
+        totalByDate = totalByDate + cellPriceValue;
+        rowsByMeans[cellMeansValue].push(rowNumber);
+        totalByMeans[cellMeansValue] =
+          totalByMeans[cellMeansValue] + cellPriceValue;
+        if (!totalProducts[cellProducs]?.length) {
+          totalProducts[cellProducs] = [cellPriceValue];
+        } else {
+          totalProducts[cellProducs].push(cellPriceValue);
         }
-      });
+      }
+    });
 
-      if (
-        rowsByDate.length &&
-        (ctx.body.toLowerCase().includes("completo") ||
-          ctx.body.toLowerCase().includes("detallado"))
-      ) {
-        await flowDynamic([
-          `Productos vendidos durante el día: *${rowsByDate.length}*
+    if (
+      rowsByDate.length &&
+      (ctx.body.toLowerCase().includes("completo") ||
+        ctx.body.toLowerCase().includes("detallado"))
+    ) {
+      await flowDynamic([
+        `Productos vendidos durante el día: *${rowsByDate.length}*
   En efectivo: *${rowsByMeans?.efectivo.length}*
   En nequi: *${rowsByMeans?.nequi.length}*
   En daviplata: *${rowsByMeans?.daviplata.length}*`,
-        ]);
+      ]);
 
-        let reportByPrice = Object.entries(totalProducts)
-          .map(
-            ([producto, precio]) =>
-              `${precio.length} ${producto}: *$${precio
-                .reduce(
-                  (acumulador, valorActual) => acumulador + valorActual,
-                  0
-                )
-                .toLocaleString("es-MX")}*`
-          )
-          .join(" \n ");
+      let reportByPrice = Object.entries(totalProducts)
+        .map(
+          ([producto, precio]) =>
+            `${precio.length} ${producto}: *$${precio
+              .reduce((acumulador, valorActual) => acumulador + valorActual, 0)
+              .toLocaleString("es-MX")}*`
+        )
+        .join(" \n ");
 
-        await flowDynamic(`Reporte por productos: \n ${reportByPrice}`);
-      }
+      await flowDynamic(`Reporte por productos: \n ${reportByPrice}`);
+    }
 
-      if (totalByDate) {
-        await flowDynamic(
-          [
-            `Total ventas en el día: *$${totalByDate.toLocaleString(
-              "es-MX"
-            )}* \n En efectivo: *$${totalByMeans?.efectivo.toLocaleString(
-              "es-MX"
-            )}* \n En nequi: *$${totalByMeans?.nequi.toLocaleString(
-              "es-MX"
-            )}* \n En daviplata: *$${totalByMeans?.daviplata.toLocaleString(
-              "es-MX"
-            )}*`,
-          ],
-          ctx.from
-        );
-      }
+    if (totalByDate) {
+      await flowDynamic(
+        [
+          `Total ventas en el día: *$${totalByDate.toLocaleString(
+            "es-MX"
+          )}* \n En efectivo: *$${totalByMeans?.efectivo.toLocaleString(
+            "es-MX"
+          )}* \n En nequi: *$${totalByMeans?.nequi.toLocaleString(
+            "es-MX"
+          )}* \n En daviplata: *$${totalByMeans?.daviplata.toLocaleString(
+            "es-MX"
+          )}*`,
+        ],
+        ctx.from
+      );
     }
   }
-);
+});
 
 const flowExcel = addKeyword("Excel")
-  .addAction(
-    async (ctx, { endFlow }) => {
-      if (!employs.includes(ctx.from)) {
-        return endFlow();
-      }
+  .addAction(async (ctx, { endFlow }) => {
+    if (!employs.includes(ctx.from)) {
+      return endFlow();
     }
-  )
+  })
   .addAnswer("Te envio el Excel", {
-    media: "./chats/ventas.xlsx",
+    media: pathData,
   });
 
 const flowEdit = addKeyword(["Corregir", "editar"])
-  .addAction(
-    async (ctx, { endFlow, flowDynamic }) => {
-      if (!employs.includes(ctx.from)) {
-        return endFlow();
-      }
-      const workbook = new exceljs.Workbook();
-      await workbook.xlsx.readFile(pathData);
-      const worksheet = workbook.getWorksheet(1);
-      const lastRow = worksheet.lastRow.number;
-      let register = "";
-
-      for (let index = 4; index >= 0; index--) {
-        let getRowInsert = worksheet.getRow(lastRow - index);
-        const Produc = getRowInsert.getCell("B").value;
-        const PriceValue = getRowInsert.getCell("C").value;
-        const MeansValue = getRowInsert.getCell("D").value;
-        register = `${register} \n *${
-          5 - index
-        }.* ${Produc} $${PriceValue.toLocaleString("es-MX")} ${MeansValue}`;
-      }
-
-      await flowDynamic(`Utimos Registros:${register}`);
+  .addAction(async (ctx, { endFlow, flowDynamic }) => {
+    if (!employs.includes(ctx.from)) {
+      return endFlow();
     }
-  )
+    const workbook = new exceljs.Workbook();
+    await workbook.xlsx.readFile(pathData);
+    const worksheet = workbook.getWorksheet(1);
+    const lastRow = worksheet.lastRow.number;
+    let register = "";
+
+    for (let index = 4; index >= 0; index--) {
+      let getRowInsert = worksheet.getRow(lastRow - index);
+      const Produc = getRowInsert.getCell("B").value;
+      const PriceValue = getRowInsert.getCell("C").value;
+      const MeansValue = getRowInsert.getCell("D").value;
+      register = `${register} \n *${
+        5 - index
+      }.* ${Produc} $${PriceValue.toLocaleString("es-MX")} ${MeansValue}`;
+    }
+
+    await flowDynamic(`Utimos Registros:${register}`);
+  })
   .addAnswer(
     "Digite el *numero* del registro que desea corregir seguido de la correccion, con el valor en miles y el medio de pago (ej. *2 bomba de helio 2000 efectivo*)",
     { capture: true },
@@ -214,7 +206,9 @@ const flowEdit = addKeyword(["Corregir", "editar"])
           });
 
         flowDynamic(
-          `Registro Modificado Correctamente: \n ${text} \n $${numericValue.toLocaleString("es-MX")} \n ${paymentMethod}`
+          `Registro Modificado Correctamente: \n ${text} \n $${numericValue.toLocaleString(
+            "es-MX"
+          )} \n ${paymentMethod}`
         );
       } else {
         return fallBack();
