@@ -8,13 +8,13 @@ class ChatCastorClass extends CoreClass {
     this.data = data;
   }
 
-  saveData = (product, price, means) => {
+  saveData = async (product, price, means) => {
     const pathData = path.join("chats", "ventas.xlsx");
     const workbook = new this.data.exceljs.Workbook();
     const today = this.data.moment().format("DD-MM-YY hh:mm");
 
     if (fs.existsSync(pathData)) {
-      workbook.xlsx.readFile(pathData).then(() => {
+      await workbook.xlsx.readFile(pathData).then(() => {
         const worksheet = workbook.getWorksheet(1);
         worksheet.addRow([today, product, price, means ?? "efectivo"]);
         workbook.xlsx
@@ -35,7 +35,7 @@ class ChatCastorClass extends CoreClass {
         { header: "Medio de pago", key: "means" },
       ];
       worksheet.addRow([today, product, price, means ?? "efectivo"]);
-      workbook.xlsx
+      await workbook.xlsx
         .writeFile(pathData)
         .then(() => {
           console.log("historial creado");
