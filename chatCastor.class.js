@@ -9,7 +9,7 @@ class ChatCastorClass extends CoreClass {
   }
 
   saveData = async (product, price, means) => {
-    const pathData = path.join("chats", "ventas.xlsx");
+    const pathData = path.join("ventas.xlsx");
     const workbook = new this.data.exceljs.Workbook();
     const today = this.data.moment().format("DD-MM-YY hh:mm");
 

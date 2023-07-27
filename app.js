@@ -12,7 +12,7 @@ const MockAdapter = require("@bot-whatsapp/database/mock");
 
 const exceljs = require("exceljs");
 const moment = require("moment");
-const pathData = path.join("chats", "ventas.xlsx");
+const pathData = path.join("ventas.xlsx");
 
 const ChatCastorClass = require("./chatCastor.class");
 
